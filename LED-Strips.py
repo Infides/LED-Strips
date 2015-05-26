@@ -5,7 +5,7 @@ import time
 import colorsys
 import math
 import logging as log
-log.basicConfig(filename='LED-Strip.log',level=log.INFO,format='%(asctime)s %(message)s')
+log.basicConfig(filename='log/LED-Strip.log',level=log.INFO,format='%(asctime)s %(message)s')
 
 from tinkerforge.ip_connection import IPConnection
 from tinkerforge.ip_connection import Error
@@ -267,11 +267,12 @@ class led_strips:
         # Always use all LEDs for the gradient
         active_leds = self.MAX_LEDS
 
-        # Match the velocity of the gradient by the position of th erotary poti
+        # Match the velocity of the gradient by the position of the rotary poti
         gradient_velocity = (position / 3)
         #gradient_velocity = self.POSITION_VELOCITY
         print('Gradient velocity: {0:0.1f}'.format(gradient_velocity))
 
+        """
         red_array = []
         green_array = []
         blue_array = []
@@ -297,27 +298,29 @@ class led_strips:
         
         # Get the gradient to the strips
         self.set_mode(self.MODE, 0, self.MAX_LEDS, red_array, blue_array, green_array)
-        
-        # Looping till the end of the world
-        #range_leds = list(range(active_leds))
-        #print('Range LEDs: ' + str(range_leds))
-        #while gradient_velocity > 0:
+        """
 
-            #red_array = []
-            #green_array = []
-            #blue_array = []
+        # Put it in a loop
+        range_leds = list(range(active_leds))
+        print('Range LEDs: ' + str(range_leds))
+
+        while True:
             
-            #range_leds = list(range_leds[int(gradient_velocity) % 16:]) + list(range_leds[:int(gradient_velocity) % 16])
-            #print('Range LEDs: ' + str(range_leds))
+            red_array = []
+            green_array = []
+            blue_array = []
+            
+            range_leds = list(range_leds[int(gradient_velocity) % 16:]) + list(range_leds[:int(gradient_velocity) % 16])
+            print('Range LEDs: ' + str(range_leds))
 
-            #for i in range_leds:
-                #r, g, b = colorsys.hsv_to_rgb(1.*i/active_leds, self.POSITION_SATURATION, self.POSITION_VALUE)
-                #red_array.append(int(r*255))
-                #green_array.append(int(g*255))
-                #blue_array.append(int(b*255))
+            for i in range_leds:
+                r, g, b = colorsys.hsv_to_rgb(1.*i/active_leds, self.POSITION_SATURATION, self.POSITION_VALUE)
+                red_array.append(int(r*255))
+                green_array.append(int(g*255))
+                blue_array.append(int(b*255))
 
             # Get the gradient to the strips
-            #self.set_mode(self.MODE, 0, self.MAX_LEDS, red_array, blue_array, green_array)
+            self.set_mode(self.MODE, 0, self.MAX_LEDS, red_array, blue_array, green_array)
 
     # Only one LED is active and moves from one end to the other end of the strip. The moving can be adjusted by the velocity.
     def set_color_dot(self):
@@ -325,6 +328,7 @@ class led_strips:
     
     # The LEDs are fading from 0.1 to 1.0 in the value space. The fading can be adjusted by the velocity.
     def set_color_fading(self, position):
+        """
         while True:
             # Adjust the value
             value = 0.1 
@@ -346,11 +350,55 @@ class led_strips:
             #print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
             # Now get it to the strips
             self.set_mode(self.MODE, 0, self.MAX_LEDS, r, b, g)
+        """
 
-            if self.MODE == self.MODE_OFF:
-                break
+        for value in range(1, 11):
+            value = value / 10
+            print("Value: " + str(value))
+            r, g, b = colorsys.hsv_to_rgb(self.POSITION_HUE, self.POSITION_SATURATION, value)
+            r = int(r*255)
+            g = int(g*255)
+            b = int(b*255)
+            #print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
+            # Get the actual number of LEDs which should be used
+            active_leds = self.ACTIVE_LEDS
+            r = [r]*active_leds
+            g = [g]*active_leds
+            b = [b]*active_leds
+            # Now add the remaining dark leds to the list
+            dark_leds = 16 - active_leds
+            r.extend([0]*dark_leds)
+            g.extend([0]*dark_leds)
+            b.extend([0]*dark_leds)
+            #print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
+            # Now get it to the strips
+            self.set_mode(self.MODE, 0, self.MAX_LEDS, r, b, g)
+            time.sleep(0.1)
 
-        
+            if value == 1.0:
+                for value in reversed(range(1,11)):
+                    value = value / 10
+                    print("Value: " + str(value))
+                    r, g, b = colorsys.hsv_to_rgb(self.POSITION_HUE, self.POSITION_SATURATION, value)
+                    r = int(r*255)
+                    g = int(g*255)
+                    b = int(b*255)
+                    #print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
+                    # Get the actual number of LEDs which should be used
+                    active_leds = self.ACTIVE_LEDS
+                    r = [r]*active_leds
+                    g = [g]*active_leds
+                    b = [b]*active_leds
+                    # Now add the remaining dark leds to the list
+                    dark_leds = 16 - active_leds
+                    r.extend([0]*dark_leds)
+                    g.extend([0]*dark_leds)
+                    b.extend([0]*dark_leds)
+                    #print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
+                    # Now get it to the strips
+                    self.set_mode(self.MODE, 0, self.MAX_LEDS, r, b, g)
+                    time.sleep(0.1)
+            
 
     # Extend the LEDs from 1 LED to 16 LEDs per strip. Like the fading, but here the LEDs can be adjusted by the velocity.
     def set_leds(self, position):
