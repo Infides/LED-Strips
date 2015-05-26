@@ -328,77 +328,26 @@ class led_strips:
     
     # The LEDs are fading from 0.1 to 1.0 in the value space. The fading can be adjusted by the velocity.
     def set_color_fading(self, position):
-        """
-        while True:
-            # Adjust the value
-            value = 0.1 
-            r, g, b = colorsys.hsv_to_rgb(self.POSITION_HUE, self.POSITION_SATURATION, value)
-            r = int(r*255)
-            g = int(g*255)
-            b = int(b*255)
-            #print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
-            # Get the actual number of LEDs which should be used
-            active_leds = self.ACTIVE_LEDS
-            r = [r]*active_leds
-            g = [g]*active_leds
-            b = [b]*active_leds
-            # Now add the remaining dark leds to the list
-            dark_leds = 16 - active_leds
-            r.extend([0]*dark_leds)
-            g.extend([0]*dark_leds)
-            b.extend([0]*dark_leds)
-            #print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
-            # Now get it to the strips
-            self.set_mode(self.MODE, 0, self.MAX_LEDS, r, b, g)
-        """
-
-        for value in range(1, 11):
-            value = value / 10
-            print("Value: " + str(value))
-            r, g, b = colorsys.hsv_to_rgb(self.POSITION_HUE, self.POSITION_SATURATION, value)
-            r = int(r*255)
-            g = int(g*255)
-            b = int(b*255)
-            #print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
-            # Get the actual number of LEDs which should be used
-            active_leds = self.ACTIVE_LEDS
-            r = [r]*active_leds
-            g = [g]*active_leds
-            b = [b]*active_leds
-            # Now add the remaining dark leds to the list
-            dark_leds = 16 - active_leds
-            r.extend([0]*dark_leds)
-            g.extend([0]*dark_leds)
-            b.extend([0]*dark_leds)
-            #print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
-            # Now get it to the strips
-            self.set_mode(self.MODE, 0, self.MAX_LEDS, r, b, g)
-            time.sleep(0.1)
-
-            if value == 1.0:
-                for value in reversed(range(1,11)):
-                    value = value / 10
-                    print("Value: " + str(value))
-                    r, g, b = colorsys.hsv_to_rgb(self.POSITION_HUE, self.POSITION_SATURATION, value)
-                    r = int(r*255)
-                    g = int(g*255)
-                    b = int(b*255)
-                    #print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
-                    # Get the actual number of LEDs which should be used
-                    active_leds = self.ACTIVE_LEDS
-                    r = [r]*active_leds
-                    g = [g]*active_leds
-                    b = [b]*active_leds
-                    # Now add the remaining dark leds to the list
-                    dark_leds = 16 - active_leds
-                    r.extend([0]*dark_leds)
-                    g.extend([0]*dark_leds)
-                    b.extend([0]*dark_leds)
-                    #print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
-                    # Now get it to the strips
-                    self.set_mode(self.MODE, 0, self.MAX_LEDS, r, b, g)
-                    time.sleep(0.1)
-            
+        #loop_counter = 0
+        while position == 0:
+            #while loop_counter < 5:
+            print("Position: " + str(position))
+            #print("Loop counter: " + str(loop_counter))
+            for value in range(1, 11):
+                value = value / 10
+                print("Value: " + str(value))
+                r, g, b = colorsys.hsv_to_rgb(self.POSITION_HUE, self.POSITION_SATURATION, value)
+                self.build_led_strip(r, g, b)
+                time.sleep(0.075)
+            for value in reversed(range(1, 11)):
+                value = value / 10
+                print("Value: " + str(value))
+                r, g, b = colorsys.hsv_to_rgb(self.POSITION_HUE, self.POSITION_SATURATION, value)
+                self.build_led_strip(r, g, b)
+                time.sleep(0.075)
+            #loop_counter = loop_counter + 1
+        #elif position == 1:
+            #print("Position: " + str(position))
 
     # Extend the LEDs from 1 LED to 16 LEDs per strip. Like the fading, but here the LEDs can be adjusted by the velocity.
     def set_leds(self, position):
@@ -411,13 +360,13 @@ class led_strips:
         r = self.R[0]
         g = self.G[0]
         b = self.B[0]
-        print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
+        #print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
         
         # Now build the list with the active leds
         r = [r]*active_leds
         g = [g]*active_leds
         b = [b]*active_leds
-        print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
+        #print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
 
         # Now add the remaining dark leds to the list
         dark_leds = 16 - active_leds
@@ -431,6 +380,26 @@ class led_strips:
         self.set_mode(self.MODE, 0, self.MAX_LEDS, r, b, g)           
         # Save the value in the variable
         self.ACTIVE_LEDS = active_leds
+
+    # Helper function to generate the output for the LED strips
+    def build_led_strip(self, r, g, b):
+        r = int(r*255)
+        g = int(g*255)
+        b = int(b*255)
+        #print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
+        # Get the actual number of LEDs which should be used
+        active_leds = self.ACTIVE_LEDS
+        r = [r]*active_leds
+        g = [g]*active_leds
+        b = [b]*active_leds
+        # Now add the remaining dark leds to the list
+        dark_leds = 16 - active_leds
+        r.extend([0]*dark_leds)
+        g.extend([0]*dark_leds)
+        b.extend([0]*dark_leds)
+        #print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
+        # Now get it to the strips
+        self.set_mode(self.MODE, 0, self.MAX_LEDS, r, b, g)
 
     # Callback function for position callback (parameter has range -150 to 150)
     def cb_position(self, position):
@@ -452,7 +421,7 @@ class led_strips:
         elif self.MODE == self.MODE_COLOR_DOT:
             self.set_color_dot(position)
         elif self.MODE == self.MODE_COLOR_FADING:
-            self.set_color_fading(position)
+            self.set_color_fading(int(position/300))
         elif self.MODE == self.MODE_LEDS:
             self.set_leds(position)
 
