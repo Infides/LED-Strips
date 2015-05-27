@@ -177,11 +177,8 @@ class led_strips:
         print('Hue: {0:.1f}'.format(hue),'Saturation: {0:.2f}'.format(self.POSITION_SATURATION),'Value: {0:.2f}'.format(self.POSITION_VALUE))
         # Build the LED strip
         self.build_led_strip(r, g, b) 
-        # Save the values in the variables
+        # Save the value in the variable
         self.POSITION_HUE = hue/360
-        self.R = r
-        self.G = g
-        self.B = b
 
     # Match the saturation to the position by the rotary poti.
     def set_saturation(self, position):
@@ -192,11 +189,8 @@ class led_strips:
         print('Hue: {0:.1f}'.format(self.POSITION_HUE*360),'Saturation: {0:.2f}'.format(saturation),'Value: {0:.2f}'.format(self.POSITION_VALUE))
         # Build the LED strip
         self.build_led_strip(r, g, b)
-        # Save the values in the variables
+        # Save the value in the variable
         self.POSITION_SATURATION = saturation
-        self.R = r
-        self.G = g
-        self.B = b
     
     # Match the value to the position by the rotary poti.
     def set_value(self, position):
@@ -207,11 +201,8 @@ class led_strips:
         print('Hue: {0:.1f}'.format(self.POSITION_HUE*360),'Saturation: {0:.2f}'.format(self.POSITION_SATURATION),'Value: {0:.2f}'.format(value))
         # Build the LED strip
         self.build_led_strip(r, g, b)
-        # Save the values in the variables
+        # Save the value in the variable
         self.POSITION_VALUE = value
-        self.R = r
-        self.G = g
-        self.B = b
 
     # The veolcity for some functions can be adjusted by the rotary poti.
     def set_velocity(self, position):
@@ -359,6 +350,10 @@ class led_strips:
         #print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
         # Now get it to the strips
         self.set_mode(self.MODE, 0, self.MAX_LEDS, r, b, g)
+        # Save the values in the variables
+        self.R = r
+        self.G = g
+        self.B = b
 
     # Callback function for position callback (parameter has range -150 to 150)
     def cb_position(self, position):
