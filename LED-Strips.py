@@ -249,17 +249,53 @@ class led_strips:
         self.set_mode(self.MODE, 0, self.MAX_LEDS, red_array, blue_array, green_array)
         """
 
-        # Put it in a loop
         range_leds = list(range(active_leds))
-        print('Range LEDs: ' + str(range_leds))
+        #print('Range LEDs: ' + str(range_leds))
+ 
+        red_array = []
+        green_array = []
+        blue_array = []
+       
+        loop_counter = 0
 
-        while True:
+        for i in range_leds:
+            r, g, b = colorsys.hsv_to_rgb(1.*i/active_leds, self.POSITION_SATURATION, self.POSITION_VALUE)
+            red_array.append(int(r*255))
+            green_array.append(int(g*255))
+            blue_array.append(int(b*255))
+
+        for j in range(16):
+            print("Loop counter: " + str(loop_counter))
+
+            first_red = red_array.pop(0)
+            red_array.append(first_red)
+            first_green = green_array.pop(0)
+            green_array.append(first_green)
+            first_blue = blue_array.pop(0)
+            blue_array.append(first_blue)
+
+            print('R: ' + str(red_array) + '\n','G: ' + str(green_array) + '\n','B: ' + str(blue_array) + '\n')
             
+            self.set_mode(self.MODE, 0, self.MAX_LEDS, red_array, blue_array, green_array)
+
+            loop_counter = loop_counter + 1
+            
+            time.sleep(0.075)
+
+        if position == 300:
+            print("Gradient end!")
+
+        """
+        #if position < 300:
+        for k in range(16):
             red_array = []
             green_array = []
             blue_array = []
             
-            range_leds = list(range_leds[int(gradient_velocity) % 16:]) + list(range_leds[:int(gradient_velocity) % 16])
+            #range_leds = list(range_leds[int(gradient_velocity) % 16:]) + list(range_leds[:int(gradient_velocity) % 16])
+            print("k: " + str(k))
+            #range_leds = list(range_leds[k % 16:]) + list(range_leds[:k % 16])
+            range_leds = list(range_leds[k:]) + list(range_leds[:k])
             print('Range LEDs: ' + str(range_leds))
 
             for i in range_leds:
@@ -268,8 +304,13 @@ class led_strips:
                 green_array.append(int(g*255))
                 blue_array.append(int(b*255))
 
+            print('R: ' + str(red_array) + '\n','G: ' + str(green_array) + '\n','B: ' + str(blue_array) + '\n')
+            
             # Get the gradient to the strips
             self.set_mode(self.MODE, 0, self.MAX_LEDS, red_array, blue_array, green_array)
+
+            time.sleep(0.075)
+        """
 
     # Only one LED is active and moves from one end to the other end of the strip. The moving can be adjusted by the velocity.
     def set_color_dot(self):
@@ -295,7 +336,7 @@ class led_strips:
                 r, g, b = colorsys.hsv_to_rgb(self.POSITION_HUE, self.POSITION_SATURATION, value)
                 self.build_led_strip(r, g, b)
                 time.sleep(0.075)
-            loop_counter = loop_counter + 1
+                loop_counter = loop_counter + 1
         elif position >= 300:
             print("Position: " + str(position))
 
@@ -336,7 +377,7 @@ class led_strips:
         r = int(r*255)
         g = int(g*255)
         b = int(b*255)
-        print('R: ' + str(r),'G: ' + str(g),'B: ' + str(b))
+        #print('R: ' + str(r),'G: ' + str(g),'B: ' + str(b))
         # Get the actual number of LEDs which should be used
         active_leds = self.ACTIVE_LEDS
         r = [r]*active_leds
