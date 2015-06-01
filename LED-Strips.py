@@ -312,14 +312,54 @@ class led_strips:
             time.sleep(0.075)
         """
 
-    # Only one LED is active and moves from one end to the other end of the strip. The moving can be adjusted by the velocity.
-    def set_color_dot(self):
-        None
-    
+    # Only one LED is active and moves from one end to the other end of the strip.
+    # The speed can be adjusted by the velocity function.
+    def set_color_dot(self, position):
+        # Build the initial array
+        r = self.R[0]
+        g = self.G[0]
+        b = self.B[0]
+        r = [r]
+        g = [g]
+        b = [b]
+        r.extend([0]*15)
+        g.extend([0]*15)
+        b.extend([0]*15)
+        #print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
+        # Now get the dot moving
+        i = 0
+        while i < 15:
+            dot_r = r[i]
+            dot_g = g[i]
+            dot_b = b[i]
+            r[i] = 0
+            g[i] = 0
+            b[i] = 0
+            r[i+1] = dot_r
+            g[i+1] = dot_g
+            b[i+1] = dot_b
+            print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
+            i = i + 1
+            self.set_mode(self.MODE, 0, self.MAX_LEDS, r, b, g)
+            time.sleep(0.1)
+        while i > 0:
+            dot_r = r[i]
+            dot_g = g[i]
+            dot_b = b[i]
+            r[i] = 0
+            g[i] = 0
+            b[i] = 0
+            r[i-1] = dot_r
+            g[i-1] = dot_g
+            b[i-1] = dot_b
+            print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
+            i = i - 1
+            self.set_mode(self.MODE, 0, self.MAX_LEDS, r, b, g)
+            time.sleep(0.1)
+ 
     # The LEDs are fading from 0.1 to 1.0 in the value space. The fading can be adjusted by the velocity.
     def set_color_fading(self, position):
         loop_counter = 0
-        print("Pre loop: " + str(position)) 
         if position < 300:
             #while loop_counter < 5:
             print("Position: " + str(position))
