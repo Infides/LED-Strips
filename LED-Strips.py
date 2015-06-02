@@ -42,9 +42,9 @@ class led_strips:
     POSITION_VALUE = 0.3
     POSITION_VELOCITY = 1
 
-    R = 255
-    G = 255
-    B = 255
+    R = [255]*16
+    G = [0]*16
+    B = [0]*16
     
     MAX_LEDS = 16
     ACTIVE_LEDS = 16
@@ -493,10 +493,24 @@ class led_strips:
 if __name__ == "__main__":
     log.info('LED-Strips: Start')
 
+    # Start the class
     ledstrips = led_strips()
+
+    # Wait a little bit, so everything can be initialized
+    time.sleep(0.5)
+
+    # Make a nice initial setup
+    if ledstrips.ipcon != None:
+        ledstrips.MODE_STRIPS = led_strips.MODE_BOTH_STRIPS
+        ledstrips.set_color_dot(100)
+        ledstrips.set_color_dot(100)
+        ledstrips.set_color_fading(100)
+        ledstrips.set_color_fading(100)
+        ledstrips.leds_off()
 
     input('Press enter to exit.\n')
 
+    # Clean shutdown
     if ledstrips.ipcon != None:
         ledstrips.MODE_STRIPS = led_strips.MODE_BOTH_STRIPS
         ledstrips.leds_off()
