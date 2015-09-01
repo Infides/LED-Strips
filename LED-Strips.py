@@ -4,8 +4,9 @@
 import time
 import colorsys
 import math
+import random
 import logging as log
-log.basicConfig(filename='log/LED-Strip.log',level=log.INFO,format='%(asctime)s %(message)s')
+#log.basicConfig(filename='log/LED-Strip.log',level=log.INFO,format='%(asctime)s %(message)s')
 
 from tinkerforge.ip_connection import IPConnection
 from tinkerforge.ip_connection import Error
@@ -21,16 +22,17 @@ class led_strips:
     UID_LED_STRIP_ONE = "jGy"
     UID_LED_STRIP_TWO = "jHE"
 
-    MODE = 0 
+    MODE = 0
     MODE_HUE = 1
     MODE_SATURATION = 2
-    MODE_VALUE = 3 
-    MODE_VELOCITY = 4  
+    MODE_VALUE = 3
+    MODE_VELOCITY = 4
     MODE_COLOR_GRADIENT = 5
     MODE_COLOR_DOT = 6
-    MODE_COLOR_FADING = 7   
-    MODE_LEDS = 8    
-    MODE_OFF = 9
+    MODE_COLOR_FADING = 7
+    MODE_COLOR_RANDOMLY = 8
+    MODE_LEDS = 9
+    MODE_OFF = 10
 
     MODE_STRIPS = 0
     MODE_LEFT_STRIP = 1
@@ -174,7 +176,7 @@ class led_strips:
         # Convert the HSV color (hue,saturation,value) to the RGB color
         # The function expects hue to be in the range 0-1 not 0-360
         r, g, b = colorsys.hsv_to_rgb(hue/360, self.POSITION_SATURATION, self.POSITION_VALUE)
-        print('Hue: {0:.1f}'.format(hue),'Saturation: {0:.2f}'.format(self.POSITION_SATURATION),'Value: {0:.2f}'.format(self.POSITION_VALUE))
+        #print('Hue: {0:.1f}'.format(hue),'Saturation: {0:.2f}'.format(self.POSITION_SATURATION),'Value: {0:.2f}'.format(self.POSITION_VALUE))
         # Build the LED strip
         self.build_led_strip(r, g, b) 
         # Save the value in the variable
@@ -186,7 +188,7 @@ class led_strips:
         saturation = (position / 300)
         # Convert the HSV color (hue,saturation,value) to the RGB color
         r, g, b = colorsys.hsv_to_rgb(self.POSITION_HUE, saturation, self.POSITION_VALUE) 
-        print('Hue: {0:.1f}'.format(self.POSITION_HUE*360),'Saturation: {0:.2f}'.format(saturation),'Value: {0:.2f}'.format(self.POSITION_VALUE))
+        #print('Hue: {0:.1f}'.format(self.POSITION_HUE*360),'Saturation: {0:.2f}'.format(saturation),'Value: {0:.2f}'.format(self.POSITION_VALUE))
         # Build the LED strip
         self.build_led_strip(r, g, b)
         # Save the value in the variable
@@ -198,116 +200,84 @@ class led_strips:
         value = (position / 300)
         # Convert the HSV color (hue,saturation,value) to the RGB color
         r, g, b = colorsys.hsv_to_rgb(self.POSITION_HUE, self.POSITION_SATURATION, value)
-        print('Hue: {0:.1f}'.format(self.POSITION_HUE*360),'Saturation: {0:.2f}'.format(self.POSITION_SATURATION),'Value: {0:.2f}'.format(value))
+        #print('Hue: {0:.1f}'.format(self.POSITION_HUE*360),'Saturation: {0:.2f}'.format(self.POSITION_SATURATION),'Value: {0:.2f}'.format(value))
         # Build the LED strip
         self.build_led_strip(r, g, b)
         # Save the value in the variable
         self.POSITION_VALUE = value
 
+    # NOT USED AT THE MOMENT
     # The veolcity for some functions can be adjusted by the rotary poti.
     def set_velocity(self, position):
         velocity = (position / 3)
-        print('Velocity: {0:0.1f}'.format(velocity))
+        #print('Velocity: {0:0.1f}'.format(velocity))
         # Save the velocity in the variable
         self.POSITION_VELOCITY = velocity
 
     # Function to generate a rainbow gradient. Can be adjusted by the velocity.
-    def set_color_gradient(self):# position):
-        # Always use all LEDs for the gradient
+    def set_color_gradient(self, position):
+        # use all LEDs for the gradient
         active_leds = self.MAX_LEDS
-
-        # Match the velocity of the gradient by the position of the rotary poti
-        #gradient_velocity = (position / 3)
-        #gradient_velocity = self.POSITION_VELOCITY
-        #print('Gradient velocity: {0:0.1f}'.format(gradient_velocity))
-
-        """
-        red_array = []
-        green_array = []
-        blue_array = []
-
-        range_leds = list(range(active_leds))
-        print('Range LEDs: ' + str(range_leds))
-
-        range_leds = list(range_leds[int(gradient_velocity) % 16:]) + list(range_leds[:int(gradient_velocity) % 16])
-        print('Range LEDs: ' + str(range_leds))
-
-        # Start from the other side of the strip
-        range_leds = list(reversed(range_leds))
-        print('Reversed LEDs: ' + str(range_leds))
-
-        # Generating the color gradient
-        for i in range_leds:
-            r, g, b = colorsys.hsv_to_rgb(1.*i/active_leds, self.POSITION_SATURATION, self.POSITION_VALUE)
-            red_array.append(int(r*255))
-            green_array.append(int(g*255))
-            blue_array.append(int(b*255))
- 
-        print('R: ' + str(red_array) + '\n','G: ' + str(green_array) + '\n','B: ' + str(blue_array) + '\n')
-        
-        # Get the gradient to the strips
-        self.set_mode(self.MODE, 0, self.MAX_LEDS, red_array, blue_array, green_array)
-        """
-
-        range_leds = list(range(active_leds))
-        #print('Range LEDs: ' + str(range_leds))
- 
-        red_array = []
-        green_array = []
-        blue_array = []
-       
         loop_counter = 0
-
-        for i in range_leds:
-            r, g, b = colorsys.hsv_to_rgb(1.*i/active_leds, self.POSITION_SATURATION, self.POSITION_VALUE)
-            red_array.append(int(r*255))
-            green_array.append(int(g*255))
-            blue_array.append(int(b*255))
-
-        for j in range(16):
-            print("Loop counter: " + str(loop_counter))
-
-            first_red = red_array.pop(0)
-            red_array.append(first_red)
-            first_green = green_array.pop(0)
-            green_array.append(first_green)
-            first_blue = blue_array.pop(0)
-            blue_array.append(first_blue)
-
-            print('R: ' + str(red_array) + '\n','G: ' + str(green_array) + '\n','B: ' + str(blue_array) + '\n')
-            
-            self.set_mode(self.MODE, 0, self.MAX_LEDS, red_array, blue_array, green_array)
-
-            loop_counter = loop_counter + 1
-            
+        r = []
+        g = []
+        b = []
+        for led in list(range(active_leds)):
+            rv, gv, bv = colorsys.hsv_to_rgb(1.*led/active_leds, self.POSITION_SATURATION, self.POSITION_VALUE)
+            r.append(int(rv*255))
+            g.append(int(gv*255))
+            b.append(int(bv*255))
+        for leds in range(active_leds):
+            #print("Loop counter: " + str(loop_counter))
+            first_red = r.pop(0)
+            r.append(first_red)
+            first_green = g.pop(0)
+            g.append(first_green)
+            first_blue = b.pop(0)
+            b.append(first_blue)
+            #print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
+            self.set_mode(self.MODE, 0, self.MAX_LEDS, r, b, g)
+            loop_counter = loop_counter + 1            
             time.sleep(0.075)
 
-        """
-        #if position < 300:
-        for k in range(16):
-            red_array = []
-            green_array = []
-            blue_array = []
-            
-            #range_leds = list(range_leds[int(gradient_velocity) % 16:]) + list(range_leds[:int(gradient_velocity) % 16])
-            print("k: " + str(k))
-            #range_leds = list(range_leds[k % 16:]) + list(range_leds[:k % 16])
-            range_leds = list(range_leds[k:]) + list(range_leds[:k])
-            print('Range LEDs: ' + str(range_leds))
-
-            for i in range_leds:
-                r, g, b = colorsys.hsv_to_rgb(1.*i/active_leds, self.POSITION_SATURATION, self.POSITION_VALUE)
-                red_array.append(int(r*255))
-                green_array.append(int(g*255))
-                blue_array.append(int(b*255))
-
-            print('R: ' + str(red_array) + '\n','G: ' + str(green_array) + '\n','B: ' + str(blue_array) + '\n')
-            
-            # Get the gradient to the strips
-            self.set_mode(self.MODE, 0, self.MAX_LEDS, red_array, blue_array, green_array)
-
-            time.sleep(0.075)
-        """
+    # Fade and change the color for the whole strip
+    def set_color_gradient_fading(self):
+        # Outer loop for changing the color
+        for hue in range(0, 360, 30):
+            hue = (hue / 360)
+            #print("Hue: " + str(hue))
+            # Inner loop for fading the actual color
+            for value in range(1, 21):
+                value = value / 20
+                #print("Value: " + str(value))
+                r, g, b = colorsys.hsv_to_rgb(hue, self.POSITION_SATURATION, value)
+                self.build_led_strip(r, g, b)
+                time.sleep(0.075)
+            for value in reversed(range(1, 21)):
+                value = value / 20
+                #print("Value: " + str(value))
+                r, g, b = colorsys.hsv_to_rgb(hue, self.POSITION_SATURATION, value)
+                self.build_led_strip(r, g, b)
+                time.sleep(0.075)
+ 
+    # The LEDs are fading from 0.1 to 1.0 in the value space. The fading can be adjusted by the velocity.
+    def set_color_fading(self, position):
+        loop_counter = 0
+        while loop_counter < 5:
+            #print("Loop counter: " + str(loop_counter))
+            for value in range(1, 21):
+                value = value / 20
+                #print("Value: " + str(value))
+                r, g, b = colorsys.hsv_to_rgb(self.POSITION_HUE, self.POSITION_SATURATION, value)
+                self.build_led_strip(r, g, b)
+                time.sleep(0.075)
+            for value in reversed(range(1, 21)):
+                value = value / 20
+                #print("Value: " + str(value))
+                r, g, b = colorsys.hsv_to_rgb(self.POSITION_HUE, self.POSITION_SATURATION, value)
+                self.build_led_strip(r, g, b)
+                time.sleep(0.075)
+                loop_counter = loop_counter + 1
 
     # Only one LED is active and moves from one end to the other end of the strip.
     def set_color_dot(self, position):
@@ -352,47 +322,54 @@ class led_strips:
             i = i - 1
             self.set_mode(self.MODE, 0, self.MAX_LEDS, r, b, g)
             time.sleep(0.1)
- 
-    # The LEDs are fading from 0.1 to 1.0 in the value space. The fading can be adjusted by the velocity.
-    def set_color_fading(self, position):
-        loop_counter = 0
-        while loop_counter < 5:
-            #print("Loop counter: " + str(loop_counter))
-            for value in range(1, 21):
-                value = value / 20
-                #print("Value: " + str(value))
-                r, g, b = colorsys.hsv_to_rgb(self.POSITION_HUE, self.POSITION_SATURATION, value)
-                self.build_led_strip(r, g, b)
-                time.sleep(0.075)
-            for value in reversed(range(1, 21)):
-                value = value / 20
-                #print("Value: " + str(value))
-                r, g, b = colorsys.hsv_to_rgb(self.POSITION_HUE, self.POSITION_SATURATION, value)
-                self.build_led_strip(r, g, b)
-                time.sleep(0.075)
-                loop_counter = loop_counter + 1
 
-    # Fade and change the color for the whole strip
-    def set_color_gradient_fading(self):
-        # Outer loop for changing the color
-        for hue in range(0, 360, 30):
-            hue = (hue / 360)
-            #print("Hue: " + str(hue))
-            # Inner loop for fading the actual color
-            for value in range(1, 21):
-                value = value / 20
-                #print("Value: " + str(value))
-                r, g, b = colorsys.hsv_to_rgb(hue, self.POSITION_SATURATION, value)
-                self.build_led_strip(r, g, b)
-                time.sleep(0.075)
-            for value in reversed(range(1, 21)):
-                value = value / 20
-                #print("Value: " + str(value))
-                r, g, b = colorsys.hsv_to_rgb(hue, self.POSITION_SATURATION, value)
-                self.build_led_strip(r, g, b)
-                time.sleep(0.075)
+    # Build random color values and place them randomly on the strips.
+    def set_color_randomly(self, position):
+        active_leds = self.ACTIVE_LEDS
+        """
+        r = []
+        g = []
+        b = []
+        # 1. Variant
+        for led in list(range(active_leds)):
+            rv = random.randrange(1, 256)
+            gv = random.randrange(1, 256)
+            bv = random.randrange(1, 256)
+            r.append(rv)
+            g.append(gv)
+            b.append(bv)
+        # 2. Variant
+        for led in list(range(active_leds)):
+            rv, gv, bv = colorsys.hsv_to_rgb(1.*led/active_leds, self.POSITION_SATURATION, self.POSITION_VALUE)
+            r.append(int(rv*255))
+            g.append(int(gv*255))
+            b.append(int(bv*255))
+        for leds in range(active_leds):
+            random.shuffle(r)
+            random.shuffle(g)
+            random.shuffle(b)
+            print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
+            self.set_mode(self.MODE, 0, self.MAX_LEDS, r, b, g)
+            time.sleep(0.075)
+        """
+        # 3. Variant
+        for leds in range(active_leds):
+            r = []
+            g = []
+            b = []
+            range_leds = list(range(active_leds))
+            random.shuffle(range_leds)
+            #print("LEDs: " + str(range_leds))
+            for led in range_leds:
+                rv, gv, bv = colorsys.hsv_to_rgb(1.*led/active_leds, self.POSITION_SATURATION, self.POSITION_VALUE)
+                r.append(int(rv*255))
+                g.append(int(gv*255))
+                b.append(int(bv*255))
+            #print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
+            self.set_mode(self.MODE, 0, self.MAX_LEDS, r, b, g)
+            time.sleep(0.1)
 
-    # Extend the LEDs from 1 LED to 16 LEDs per strip. Like the fading, but here the LEDs can be adjusted by the velocity.
+    # Extend the LEDs from 1 LED to 16 LEDs per strip. Like the fading, but here the LEDs can be adjusted by the rotary poti.
     def set_leds(self, position):
         # The rotary poti can set the number of LEDs which should be used
         active_leds = (position / 300) * self.MAX_LEDS
@@ -403,8 +380,8 @@ class led_strips:
         r = self.R[0]
         g = self.G[0]
         b = self.B[0]
-        #print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
-        
+        #print('R: ' + str(r),'G: ' + str(g),'B: ' + str(b))
+
         # Now build the list with the active leds
         r = [r]*active_leds
         g = [g]*active_leds
@@ -418,9 +395,10 @@ class led_strips:
         g.extend([0]*dark_leds)
         b.extend([0]*dark_leds)          
         #print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
-        
+
         # Now get it to the strips
         self.set_mode(self.MODE, 0, self.MAX_LEDS, r, b, g)           
+
         # Save the value in the variable
         self.ACTIVE_LEDS = active_leds
 
@@ -430,17 +408,20 @@ class led_strips:
         g = int(g*255)
         b = int(b*255)
         #print('R: ' + str(r),'G: ' + str(g),'B: ' + str(b))
+
         # Get the actual number of LEDs which should be used
         active_leds = self.ACTIVE_LEDS
         r = [r]*active_leds
         g = [g]*active_leds
         b = [b]*active_leds
+        
         # Now add the remaining dark leds to the list
         dark_leds = 16 - active_leds
         r.extend([0]*dark_leds)
         g.extend([0]*dark_leds)
         b.extend([0]*dark_leds)
         #print('R: ' + str(r) + '\n','G: ' + str(g) + '\n','B: ' + str(b) + '\n')
+        
         # Now get it to the strips
         self.set_mode(self.MODE, 0, self.MAX_LEDS, r, b, g)
         # Save the values in the variables
@@ -469,6 +450,8 @@ class led_strips:
             self.set_color_dot(position)
         elif self.MODE == self.MODE_COLOR_FADING:
             self.set_color_fading(position)
+        elif self.MODE == self.MODE_COLOR_RANDOMLY:
+            self.set_color_randomly(position)
         elif self.MODE == self.MODE_LEDS:
             self.set_leds(position)
 
@@ -496,6 +479,7 @@ class led_strips:
                     self.MODE = self.MODE_COLOR_FADING
                 elif i == 9:
                     #self.MODE = self.MODE_OFF
+                    self.MODE = self.MODE_COLOR_RANDOMLY
                 elif i == 10:
                     self.MODE = self.MODE_LEDS
                 elif i == 11:
